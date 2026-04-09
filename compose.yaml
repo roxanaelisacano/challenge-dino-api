@@ -1,0 +1,46 @@
+services:
+  dino-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    environment:
+      # Credenciales y conexiones usando los nombres de los contenedores
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mydatabase
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      # Esto hace que Hibernate te cree/actualice las tablas automáticamente
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=verysecret'
+      - 'MYSQL_USER=myuser'
+    ports:
+      - '3306:3306'
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: dino-mq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: 'redis:latest'
+    ports:
+      - '6379:6379'
